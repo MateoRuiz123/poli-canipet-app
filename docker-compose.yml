@@ -43,6 +43,7 @@ services:
     restart: unless-stopped
     environment:
       NODE_ENV: production
+      TYPEORM_SYNCHRONIZE: 'true'
       PORT: 3000
       # Conexión a la BD — usa el nombre del servicio "db" como host
       DB_HOST: db

@@ -22,7 +22,9 @@ import { SeedModule } from './seed/seed.module';
         password: config.get('DB_PASSWORD'),
         database: config.get('DB_NAME'),
         autoLoadEntities: true,
-        synchronize: config.get('NODE_ENV') !== 'production',
+        synchronize:
+          config.get('TYPEORM_SYNCHRONIZE') === 'true' ||
+          config.get('NODE_ENV') !== 'production',
       }),
     }),
     UsersModule,

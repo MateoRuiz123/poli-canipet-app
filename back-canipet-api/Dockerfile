@@ -1,24 +1,27 @@
 # ── Stage 1: build ──────────────────────────────────────────
 FROM node:22-alpine AS builder
 
+RUN apk add --no-cache python3 make g++
+
 RUN npm install -g pnpm@latest
 
 WORKDIR /app
 
-COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile --ignore-scripts
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+RUN pnpm install --frozen-lockfile
 
 COPY . .
-RUN pnpm run build
+RUN pnpm run build && pnpm prune --prod
 
 # ── Stage 2: production ──────────────────────────────────────
 FROM node:22-alpine AS runner
 
 WORKDIR /app
 
-COPY package.json ./
-RUN npm install --omit=dev --ignore-scripts
+ENV NODE_ENV=production
 
+COPY package.json ./
+COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 
 EXPOSE 3000
