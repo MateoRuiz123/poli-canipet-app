@@ -22,7 +22,12 @@ pipeline {
         stage('Checkout') {
             steps {
                 checkout scm
-                echo "Rama: ${env.BRANCH_NAME} · Commit: ${env.GIT_COMMIT?.take(8)}"
+                script {
+                    env.EFFECTIVE_BRANCH = env.BRANCH_NAME?.trim()
+                        ?: env.GIT_BRANCH?.replaceFirst(/^origin\//, '')?.trim()
+                        ?: ''
+                }
+                echo "Rama: ${env.EFFECTIVE_BRANCH ?: 'desconocida'} (BRANCH_NAME=${env.BRANCH_NAME}, GIT_BRANCH=${env.GIT_BRANCH}) · Commit: ${env.GIT_COMMIT?.take(8)}"
             }
         }
 
@@ -101,10 +106,7 @@ pipeline {
         // ── 3. Docker ───────────────────────────────────────────────────────
         stage('Docker · Construir imágenes') {
             when {
-                anyOf {
-                    branch 'main'
-                    branch 'develop'
-                }
+                expression { env.EFFECTIVE_BRANCH in ['main', 'develop'] }
             }
             steps {
                 sh 'docker compose build --no-cache'
@@ -114,7 +116,7 @@ pipeline {
         // ── 4. Deploy ───────────────────────────────────────────────────────
         stage('Deploy') {
             when {
-                branch 'main'
+                expression { env.EFFECTIVE_BRANCH == 'main' }
             }
             steps {
                 sh '''
@@ -128,7 +130,7 @@ pipeline {
     // ── Post-pipeline ───────────────────────────────────────────────────────
     post {
         success {
-            echo "✅ Pipeline exitoso en la rama ${env.BRANCH_NAME}"
+            echo "✅ Pipeline exitoso en la rama ${env.EFFECTIVE_BRANCH ?: env.BRANCH_NAME ?: 'desconocida'}"
         }
         failure {
             echo "❌ Pipeline falló. Revisa los logs de la etapa fallida."
