@@ -30,7 +30,7 @@ jobs:
       - run:
           name: Instalar dependencias backend
           working_directory: ~/project/back-canipet-api
-          command: pnpm install --frozen-lockfile --ignore-workspace
+          command: pnpm install --frozen-lockfile --ignore-scripts --ignore-workspace
       - save_cache:
           key: pnpm-back-v2-{{ checksum "back-canipet-api/pnpm-lock.yaml" }}
           paths:
@@ -59,7 +59,7 @@ jobs:
       - run:
           name: Instalar dependencias frontend
           working_directory: ~/project/front-canipet-web
-          command: pnpm install --frozen-lockfile --ignore-workspace
+          command: pnpm install --frozen-lockfile --ignore-scripts --ignore-workspace
       - save_cache:
           key: pnpm-fe-v2-{{ checksum "front-canipet-web/pnpm-lock.yaml" }}
           paths:

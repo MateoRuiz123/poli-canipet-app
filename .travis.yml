@@ -20,8 +20,8 @@ cache:
     - $HOME/.local/share/pnpm/store
 
 before_install:
-  - npm i -g pnpm
-  - pnpm --version
+  - corepack enable
+  - corepack prepare pnpm@9 --activate
   - docker compose version
 
 jobs:
@@ -30,7 +30,7 @@ jobs:
     - stage: test
       name: "Backend · lint, test, build"
       install:
-        - cd back-canipet-api && pnpm approve-builds --all && pnpm install --frozen-lockfile --ignore-workspace && cd ..
+        - cd back-canipet-api && pnpm install --frozen-lockfile --ignore-scripts && cd ..
       script:
         - cd back-canipet-api
         - pnpm run lint --max-warnings 0 || true
@@ -40,7 +40,7 @@ jobs:
     - stage: test
       name: "Frontend · lint, build"
       install:
-        - cd front-canipet-web && pnpm approve-builds --all && pnpm install --frozen-lockfile --ignore-workspace && cd ..
+        - cd front-canipet-web && pnpm install --frozen-lockfile --ignore-scripts && cd ..
       script:
         - cd front-canipet-web
         - pnpm run lint || true
