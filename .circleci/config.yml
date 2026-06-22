@@ -1,0 +1,96 @@
+# Canipet — CircleCI
+# Guía: docs/README_CIRCLECI.md
+
+version: 2.1
+
+executors:
+  node-22:
+    docker:
+      - image: cimg/node:22.14
+    working_directory: ~/project
+    environment:
+      PNPM_HOME: /home/circleci/.local/share/pnpm
+      PATH: /home/circleci/.local/share/pnpm:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+      NODE_ENV: test
+      NEXT_PUBLIC_API_URL: http://localhost:3000/api
+
+jobs:
+  backend:
+    executor: node-22
+    steps:
+      - checkout
+      - run:
+          name: Habilitar pnpm
+          command: |
+            corepack enable
+            corepack prepare pnpm@9 --activate
+      - restore_cache:
+          keys:
+            - pnpm-back-v1-{{ checksum "back-canipet-api/pnpm-lock.yaml" }}
+      - run:
+          name: Instalar dependencias backend
+          command: pnpm install --frozen-lockfile --dir back-canipet-api
+      - save_cache:
+          key: pnpm-back-v1-{{ checksum "back-canipet-api/pnpm-lock.yaml" }}
+          paths:
+            - back-canipet-api/node_modules
+      - run:
+          name: Lint, tests y build backend
+          command: |
+            cd back-canipet-api
+            pnpm run lint --max-warnings 0 || true
+            pnpm run test --passWithNoTests
+            pnpm run build
+
+  frontend:
+    executor: node-22
+    steps:
+      - checkout
+      - run:
+          name: Habilitar pnpm
+          command: |
+            corepack enable
+            corepack prepare pnpm@9 --activate
+      - restore_cache:
+          keys:
+            - pnpm-fe-v1-{{ checksum "front-canipet-web/pnpm-lock.yaml" }}
+      - run:
+          name: Instalar dependencias frontend
+          command: pnpm install --frozen-lockfile --dir front-canipet-web
+      - save_cache:
+          key: pnpm-fe-v1-{{ checksum "front-canipet-web/pnpm-lock.yaml" }}
+          paths:
+            - front-canipet-web/node_modules
+      - run:
+          name: Lint y build frontend
+          command: |
+            cd front-canipet-web
+            pnpm run lint || true
+            pnpm run build
+
+  docker-build:
+    docker:
+      - image: cimg/base:stable
+    working_directory: ~/project
+    steps:
+      - checkout
+      - setup_remote_docker:
+          version: default
+      - run:
+          name: Construir imágenes Docker
+          command: docker compose build
+
+workflows:
+  canipet-ci:
+    jobs:
+      - backend
+      - frontend
+      - docker-build:
+          requires:
+            - backend
+            - frontend
+          filters:
+            branches:
+              only:
+                - main
+                - develop

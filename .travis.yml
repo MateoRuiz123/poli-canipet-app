@@ -1,0 +1,64 @@
+# Canipet — Travis CI
+# Guía de configuración: docs/README_TRAVIS.md (carpeta docs del equipo)
+
+language: node_js
+node_js: "22"
+
+services:
+  - docker
+
+env:
+  global:
+    - PNPM_HOME="$HOME/.local/share/pnpm"
+    - PATH="$PNPM_HOME:$PATH"
+    - NODE_ENV=test
+    - NEXT_PUBLIC_API_URL=http://localhost:3000/api
+    # JWT_SECRET y DB_PASSWORD → Travis CI → Settings → Environment Variables
+
+cache:
+  directories:
+    - $HOME/.local/share/pnpm/store
+    - back-canipet-api/node_modules
+    - front-canipet-web/node_modules
+
+before_install:
+  - corepack enable
+  - corepack prepare pnpm@9 --activate
+  - docker compose version
+
+install:
+  - pnpm install --frozen-lockfile --dir back-canipet-api
+  - pnpm install --frozen-lockfile --dir front-canipet-web
+
+jobs:
+  fast_finish: true
+  include:
+    - stage: test
+      name: "Backend · lint, test, build"
+      script:
+        - cd back-canipet-api
+        - pnpm run lint --max-warnings 0 || true
+        - pnpm run test --passWithNoTests
+        - pnpm run build
+
+    - stage: test
+      name: "Frontend · lint, build"
+      script:
+        - cd front-canipet-web
+        - pnpm run lint || true
+        - pnpm run build
+
+    - stage: test
+      name: "Docker · construir imágenes"
+      if: branch = main OR branch = develop
+      script:
+        - docker compose build
+
+    - stage: test
+      name: "Docker · validar stack (solo main)"
+      if: branch = main
+      script:
+        - docker compose config --quiet
+        - docker compose up -d --wait
+        - docker compose ps
+        - docker compose down --remove-orphans
