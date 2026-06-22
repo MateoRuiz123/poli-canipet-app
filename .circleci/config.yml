@@ -22,17 +22,17 @@ jobs:
       - run:
           name: Habilitar pnpm
           command: |
-            corepack enable
-            corepack prepare pnpm@9 --activate
+            npm i -g pnpm
+            pnpm --version
       - restore_cache:
           keys:
-            - pnpm-back-v1-{{ checksum "back-canipet-api/pnpm-lock.yaml" }}
+            - pnpm-back-v2-{{ checksum "back-canipet-api/pnpm-lock.yaml" }}
       - run:
           name: Instalar dependencias backend
           working_directory: ~/project/back-canipet-api
-          command: pnpm install --frozen-lockfile
+          command: pnpm install --frozen-lockfile --ignore-workspace
       - save_cache:
-          key: pnpm-back-v1-{{ checksum "back-canipet-api/pnpm-lock.yaml" }}
+          key: pnpm-back-v2-{{ checksum "back-canipet-api/pnpm-lock.yaml" }}
           paths:
             - back-canipet-api/node_modules
       - run:
@@ -51,16 +51,17 @@ jobs:
           name: Habilitar pnpm
           command: |
             corepack enable
-            corepack prepare pnpm@9 --activate
+            corepack prepare pnpm@9.15.9 --activate
+            pnpm --version
       - restore_cache:
           keys:
-            - pnpm-fe-v1-{{ checksum "front-canipet-web/pnpm-lock.yaml" }}
+            - pnpm-fe-v2-{{ checksum "front-canipet-web/pnpm-lock.yaml" }}
       - run:
           name: Instalar dependencias frontend
           working_directory: ~/project/front-canipet-web
-          command: pnpm install --frozen-lockfile
+          command: pnpm install --frozen-lockfile --ignore-workspace
       - save_cache:
-          key: pnpm-fe-v1-{{ checksum "front-canipet-web/pnpm-lock.yaml" }}
+          key: pnpm-fe-v2-{{ checksum "front-canipet-web/pnpm-lock.yaml" }}
           paths:
             - front-canipet-web/node_modules
       - run:
