@@ -18,23 +18,19 @@ env:
 cache:
   directories:
     - $HOME/.local/share/pnpm/store
-    - back-canipet-api/node_modules
-    - front-canipet-web/node_modules
 
 before_install:
   - corepack enable
   - corepack prepare pnpm@9 --activate
   - docker compose version
 
-install:
-  - pnpm install --frozen-lockfile --dir back-canipet-api
-  - pnpm install --frozen-lockfile --dir front-canipet-web
-
 jobs:
   fast_finish: true
   include:
     - stage: test
       name: "Backend · lint, test, build"
+      install:
+        - cd back-canipet-api && pnpm install --frozen-lockfile && cd ..
       script:
         - cd back-canipet-api
         - pnpm run lint --max-warnings 0 || true
@@ -43,6 +39,8 @@ jobs:
 
     - stage: test
       name: "Frontend · lint, build"
+      install:
+        - cd front-canipet-web && pnpm install --frozen-lockfile && cd ..
       script:
         - cd front-canipet-web
         - pnpm run lint || true

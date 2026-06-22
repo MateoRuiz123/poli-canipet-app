@@ -29,15 +29,16 @@ jobs:
             - pnpm-back-v1-{{ checksum "back-canipet-api/pnpm-lock.yaml" }}
       - run:
           name: Instalar dependencias backend
-          command: pnpm install --frozen-lockfile --dir back-canipet-api
+          working_directory: ~/project/back-canipet-api
+          command: pnpm install --frozen-lockfile
       - save_cache:
           key: pnpm-back-v1-{{ checksum "back-canipet-api/pnpm-lock.yaml" }}
           paths:
             - back-canipet-api/node_modules
       - run:
           name: Lint, tests y build backend
+          working_directory: ~/project/back-canipet-api
           command: |
-            cd back-canipet-api
             pnpm run lint --max-warnings 0 || true
             pnpm run test --passWithNoTests
             pnpm run build
@@ -56,15 +57,16 @@ jobs:
             - pnpm-fe-v1-{{ checksum "front-canipet-web/pnpm-lock.yaml" }}
       - run:
           name: Instalar dependencias frontend
-          command: pnpm install --frozen-lockfile --dir front-canipet-web
+          working_directory: ~/project/front-canipet-web
+          command: pnpm install --frozen-lockfile
       - save_cache:
           key: pnpm-fe-v1-{{ checksum "front-canipet-web/pnpm-lock.yaml" }}
           paths:
             - front-canipet-web/node_modules
       - run:
           name: Lint y build frontend
+          working_directory: ~/project/front-canipet-web
           command: |
-            cd front-canipet-web
             pnpm run lint || true
             pnpm run build
 
