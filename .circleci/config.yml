@@ -1,9 +1,9 @@
 version: 2.1
 
 executors:
-  node-24:
+  node-22:
     docker:
-      - image: cimg/node:24.14
+      - image: cimg/node:22.14
     working_directory: ~/project
     environment:
       PNPM_HOME: /home/circleci/.local/share/pnpm
@@ -13,14 +13,14 @@ executors:
 
 jobs:
   backend:
-    executor: node-24
+    executor: node-22
     steps:
       - checkout
       - run:
           name: Habilitar pnpm
           command: |
             corepack enable
-            corepack prepare pnpm --activate
+            corepack prepare pnpm@latest --activate
             pnpm --version
       - restore_cache:
           keys:
@@ -42,14 +42,14 @@ jobs:
             pnpm run build
 
   frontend:
-    executor: node-24
+    executor: node-22
     steps:
       - checkout
       - run:
           name: Habilitar pnpm
           command: |
             corepack enable
-            corepack prepare pnpm --activate
+            corepack prepare pnpm@latest --activate
             pnpm --version
       - restore_cache:
           keys:
@@ -57,7 +57,7 @@ jobs:
       - run:
           name: Instalar dependencias frontend
           working_directory: ~/project/front-canipet-web
-          command: pnpm install --frozen-lockfile --ignore-scripts --ignore-workspace
+          command: pnpm install --frozen-lockfile --ignore-workspace
       - save_cache:
           key: pnpm-fe-v2-{{ checksum "front-canipet-web/pnpm-lock.yaml" }}
           paths:
