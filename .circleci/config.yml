@@ -19,7 +19,8 @@ jobs:
       - run:
           name: Habilitar pnpm
           command: |
-            npm i -g pnpm
+            corepack enable
+            corepack prepare pnpm --activate
             pnpm --version
       - restore_cache:
           keys:
@@ -47,7 +48,8 @@ jobs:
       - run:
           name: Habilitar pnpm
           command: |
-            npm i -g pnpm
+            corepack enable
+            corepack prepare pnpm --activate
             pnpm --version
       - restore_cache:
           keys:
