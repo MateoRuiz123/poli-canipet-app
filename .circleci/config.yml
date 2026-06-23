@@ -1,12 +1,9 @@
-# Canipet — CircleCI
-# Guía: docs/README_CIRCLECI.md
-
 version: 2.1
 
 executors:
-  node-22:
+  node-24:
     docker:
-      - image: cimg/node:22.14
+      - image: cimg/node:24.14
     working_directory: ~/project
     environment:
       PNPM_HOME: /home/circleci/.local/share/pnpm
@@ -16,7 +13,7 @@ executors:
 
 jobs:
   backend:
-    executor: node-22
+    executor: node-24
     steps:
       - checkout
       - run:
@@ -44,14 +41,13 @@ jobs:
             pnpm run build
 
   frontend:
-    executor: node-22
+    executor: node-24
     steps:
       - checkout
       - run:
           name: Habilitar pnpm
           command: |
-            corepack enable
-            corepack prepare pnpm@9.15.9 --activate
+            npm i -g pnpm
             pnpm --version
       - restore_cache:
           keys:
