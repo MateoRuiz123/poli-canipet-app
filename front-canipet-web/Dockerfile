@@ -1,7 +1,7 @@
 # ── Stage 1: build ──────────────────────────────────────────
 FROM node:22-alpine AS builder
 
-RUN npm install -g pnpm@latest
+RUN npm install -g pnpm
 
 WORKDIR /app
 
@@ -19,7 +19,7 @@ RUN pnpm run build
 # ── Stage 2: production ──────────────────────────────────────
 FROM node:22-alpine AS runner
 
-RUN npm install -g pnpm@latest
+RUN npm install -g pnpm
 
 WORKDIR /app
 

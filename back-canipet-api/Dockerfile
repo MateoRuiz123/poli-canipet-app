@@ -3,15 +3,15 @@ FROM node:22-alpine AS builder
 
 RUN apk add --no-cache python3 make g++
 
-RUN npm install -g pnpm@latest
+RUN npm install -g pnpm
 
 WORKDIR /app
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile --ignore-scripts
 
 COPY . .
-RUN pnpm run build && pnpm prune --prod
+RUN pnpm run build && pnpm prune --prod --ignore-scripts
 
 # ── Stage 2: production ──────────────────────────────────────
 FROM node:22-alpine AS runner
